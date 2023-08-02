@@ -10,6 +10,7 @@ export default class SheetsService implements IGoogleSheet {
   constructor(spreadsheetId: string) {
     this.spreadsheetId = spreadsheetId;
 
+    // @ts-ignore
     this.spreadsheet = google.sheets({
       version: 'v4',
       auth: GoogleServicesManager.authenticationObject

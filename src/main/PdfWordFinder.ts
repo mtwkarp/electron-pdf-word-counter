@@ -1,25 +1,15 @@
 // @ts-ignore
 import { PdfReader } from 'pdfreader';
-import request from 'request'
-import GoogleServicesManager from "./GoogleServicesManager";
-import EnvLoader from "./EnvLoader";
+import fs from 'fs'
 
 export default class PDFKeywordsFinder {
-  constructor() {
-    EnvLoader.load();
-
-    const googleServicesManager = new GoogleServicesManager();
-
-    googleServicesManager.authorize();
-  }
-
-  async read(fileLink: string, keywords: string[]): Promise<string> {
+  async read(filePath: string, keywords: string[]): Promise<string> {
     return new Promise(async(resolve) => {
       const foundedWords: Record<string, { number: number }> = {};
 
       let result = '';
 
-      request({ url: fileLink, encoding: null }, function(error, response, body) {
+      fs.readFile(filePath, function(error, body) {
         new PdfReader().parseBuffer(body, (err: any, item: { text: string }) => {
           if (err) console.error('error:', err);
           else if (!item) {

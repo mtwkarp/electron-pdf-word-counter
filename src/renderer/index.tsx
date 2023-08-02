@@ -1,7 +1,5 @@
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import EnvLoader from "../main/EnvLoader";
-import GoogleServicesManager from "../main/GoogleServicesManager";
 
 async function init() {
   const container = document.getElementById('root') as HTMLElement;
@@ -10,8 +8,9 @@ async function init() {
   root.render(<App />);
 
 // calling IPC exposed from preload script
-  window.electron.ipcRenderer.once('ipc-example', (arg) => {
+  window.electron.ipcRenderer.on('ipc-example', (arg) => {
     // eslint-disable-next-line no-console
+    // console.log('hello')
     console.log(arg);
   });
   window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);

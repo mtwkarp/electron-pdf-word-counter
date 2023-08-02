@@ -14,6 +14,10 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import EnvLoader from "./EnvLoader";
+import GoogleServicesManager from "./GoogleServicesManager";
+import PdfWordFinder from './PdfWordFinder'
+import KeywordsSheet from "./KeywordsSheet";
 
 class AppUpdater {
   constructor() {
@@ -29,6 +33,21 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.on('read-pdf', async (event, pdfPaths: {path: string, name: string}[]) => {
+  const keywords = await new KeywordsSheet().getKeywords()
+  const PdfWordCounter = new PdfWordFinder()
+  const foundedWords: {fileName: string, result: string}[] = []
+
+  for (let i = 0; i < pdfPaths.length; i++) {
+    const {path, name} = pdfPaths[i];
+    const result = await PdfWordCounter.read(path, keywords)
+
+    foundedWords.push({result, fileName: name})
+  }
+
+  event.reply('read-pdf', foundedWords);
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -57,6 +76,8 @@ const installExtensions = async () => {
 };
 
 const createWindow = async () => {
+  EnvLoader.load()
+  await new GoogleServicesManager().authorize()
   if (isDebug) {
     await installExtensions();
   }
